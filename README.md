@@ -43,4 +43,5 @@ These are more statistical/informational:
 * Total numbers of: tracks, albums, artists, genre's, total collection size in GB
 * Breakdown of file formats: mp3/flac/ogg/etc
 * Breakdown of bitrates for mp3/ogg/etc
-*
+* Most/least represented:
+	* Artist, Genre
