@@ -47,3 +47,7 @@ These are more statistical/informational:
 * Breakdown of bitrates for mp3/ogg/etc
 * Most/least represented:
 	* Artist, Genre
+
+## TODO:
+
+* Choose a tagging library. Probably either [Mutagen](http://code.google.com/p/mutagen/) or [hsaudiotag](https://pypi.python.org/pypi/hsaudiotag)
