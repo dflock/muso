@@ -1,6 +1,6 @@
-# muso
+# muso - The Music Collection Auditor
 
-Music Collection Auditor
+Muso will audit a large digital music collection and check for consistency and proper structure - in both metadata/tags and file & folder names.
 
 This script will do the following things, eventually:
 
