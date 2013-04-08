@@ -22,7 +22,7 @@ def build_file_tree(root):
         current_item = join(root, item)
         if isdir(current_item):
             sub_items = os.listdir(current_item)
-            tree[item] = filter(lambda x: isdir(join(current_item, x)), sub_items)
+            tree[item] = filter(lambda x: isdir(join(current_item, x)) and not x.startswith('.'), sub_items)
     return tree
 
 
