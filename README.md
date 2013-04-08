@@ -1,4 +1,4 @@
-# muso - The Music Collection Auditor
+# Muso - Music Collection Auditor
 
 Muso will audit a large digital music collection and check for consistency and proper structure - in both metadata/tags and file & folder names.
 
@@ -29,7 +29,7 @@ These are things that you might want to fix:
 	* album, artist, albumartist, tracknumber, discnumber, title, genre, date
 	* replaygain_album_gain, replaygain_album_peak, replaygain_track_gain, replaygain_track_peak
 	* musicbrainz_albumid, musicbrainz_albumartistid, musicbrainz_trackid
-* A folder.jpeg|jpg in each album & artist folder, of at least 500x500px
+* A folder.jpg in each album & artist folder, of at least 500x500px
 * Extraneous .m3u, .info, .sfv, etc... files.
 * The following filename structures:
 	* Compilation Albums: <album> - <discnumber>.<tracknumber> - <artist> - <title>.ext
