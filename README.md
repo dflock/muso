@@ -32,8 +32,8 @@ These are things that you might want to fix:
 * A folder.jpg in each album & artist folder, of at least 500x500px
 * Extraneous .m3u, .info, .sfv, etc... files.
 * The following filename structures:
-	* Compilation Albums: <album> - <discnumber>.<tracknumber> - <artist> - <title>.ext
-	* Regular Albums:     <artist> - <album> - <discnumber>.<tracknumber> - <title>.ext
+	* Compilation Albums: `<album> - <discnumber>.<tracknumber> - <artist> - <title>.ext`
+	* Regular Albums:     `<artist> - <album> - <discnumber>.<tracknumber> - <title>.ext`
 * Genre issues:
 	* Genre's with small number of tracks/ one track/ablum in
 	* Unknown genre's/malformed genre tags
