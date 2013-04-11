@@ -59,6 +59,7 @@ def check_album_folder(path):
         for item in contents:
             item_path = join(path, item)
             if is_image_file(item_path):
+                # This needs to specifically check for folder.jpg too, because it's special.
                 has_album_art = True
             elif not (is_music_file(item_path) or is_ignored_file(item_path)):
                 only_contains_music = False
