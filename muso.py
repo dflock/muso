@@ -109,7 +109,6 @@ def check_music_file(file):
     """
     pass
 
-# TODO: Maybe add extra mimitypes for .log, .cue, etc... files.
 mimetypes.init()
 mimetypes.add_type('application/x-cue', '.cue', strict=True)
 mimetypes.add_type('text/x-log', '.log', strict=True)
