@@ -1,4 +1,4 @@
-# This Python file uses the following encoding: utf-8
+# -*- coding: utf-8 -*-
 
 """
 muso
@@ -57,9 +57,10 @@ def check_album_folder(path):
         only_contains_music = True
 
         for item in contents:
-            if is_image_file(join(path, item)):
+            item_path = join(path, item)
+            if is_image_file(item_path):
                 has_album_art = True
-            elif not is_music_file(join(path, item)):
+            elif not (is_music_file(item_path) or is_ignored_file(item_path)):
                 only_contains_music = False
 
     # return has_album_art and only_contains_music
@@ -86,6 +87,16 @@ def is_image_file(file):
         return False
 
 
+def is_ignored_file(file):
+    """
+    Can we ignore this file and pretend that it wasn't there?
+    """
+    try:
+        return mimetypes.guess_type(file)[0] in ('application/x-cue', 'text/x-log', 'application/x-sfv')
+    except AttributeError:
+        return False
+
+
 def check_music_file(file):
     """
     Check that the given file looks like a music file should:
@@ -98,19 +109,32 @@ def check_music_file(file):
     """
     pass
 
-# TODO: Add extra mimitypes for .log, .cue, etc... files.
+# TODO: Maybe add extra mimitypes for .log, .cue, etc... files.
 mimetypes.init()
+mimetypes.add_type('application/x-cue', '.cue', strict=True)
+mimetypes.add_type('text/x-log', '.log', strict=True)
+mimetypes.add_type('application/x-sfv', '.sfv', strict=True)
+
 root = os.path.expanduser('~') + '/Music'
 music = build_file_tree(root)
+tmp = ''
+output = ''
 
 for artist in music.keys():
-    print
-    print '[' + artist + '] Ablums:'
-    print '------------------------'
+    tmp += "\n"
+    tmp += '[' + artist + '] Ablums:\n'
+    tmp += '------------------------\n'
     for album in music[artist]:
-        print album + ' ' + str(check_album_folder(join(root, artist, album)))
+        status = check_album_folder(join(root, artist, album))
+        if status['ok'] is False:
+            tmp += album.ljust(80) + ' ' + str(status) + '\n'
+            output += tmp
+        else:
+            tmp = ''
 
         # if check_album_folder(join(root, artist, album)):
-        #     print album + ' ✓'
+        #     tmp += album + ' ✓'
         # else:
-        #     print album + ' ?'
+        #     tmp += album + ' ✗'
+
+print output
