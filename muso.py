@@ -98,7 +98,7 @@ def check_music_file(file):
     """
     pass
 
-
+# TODO: Add extra mimitypes for .log, .cue, etc... files.
 mimetypes.init()
 root = os.path.expanduser('~') + '/Music'
 music = build_file_tree(root)
