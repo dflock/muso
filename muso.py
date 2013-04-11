@@ -1,3 +1,5 @@
+# This Python file uses the following encoding: utf-8
+
 """
 muso
 ========================
@@ -8,6 +10,9 @@ The Music Collection Auditor
 import os
 from os.path import join
 from os.path import isdir
+from os.path import isfile
+
+import mimetypes
 
 
 def build_file_tree(root):
@@ -30,7 +35,7 @@ def check_artist_folder(path):
     """
     Check that the given path looks like an Artist folder should:
 
-    - has a folder.jpg
+    - has a folder.jpg, possibly more than one image, but no music.
     - otherwise, only contains folders, which contain music
     """
     pass
@@ -43,12 +48,47 @@ def check_album_folder(path):
     - has a folder.jpg
     - otherwise, only contains music
     """
-    pass
+
+    if isdir(path):
+        contents = os.listdir(path)
+        contents = filter(lambda x: isfile(join(path, x)) and not x.startswith('.'), contents)
+
+        has_album_art = False
+        only_contains_music = True
+
+        for item in contents:
+            if is_image_file(join(path, item)):
+                has_album_art = True
+            elif not is_music_file(join(path, item)):
+                only_contains_music = False
+
+    # return has_album_art and only_contains_music
+    return {'ok': has_album_art and only_contains_music, 'has_album_art': has_album_art, 'only_contains_music': only_contains_music}
+
+
+def is_music_file(file):
+    """
+    Is file a music file?
+    """
+    try:
+        return mimetypes.guess_type(file)[0].startswith('audio')
+    except AttributeError:
+        return False
+
+
+def is_image_file(file):
+    """
+    Is file an image file?
+    """
+    try:
+        return mimetypes.guess_type(file)[0].startswith('image')
+    except AttributeError:
+        return False
 
 
 def check_music_file(file):
     """
-    Check that the given path looks like a music file should:
+    Check that the given file looks like a music file should:
 
     - is an mp3|flac|ogg file
     - filename matches one of these:
@@ -59,11 +99,18 @@ def check_music_file(file):
     pass
 
 
-music = build_file_tree(os.path.expanduser('~') + '/Music')
+mimetypes.init()
+root = os.path.expanduser('~') + '/Music'
+music = build_file_tree(root)
 
 for artist in music.keys():
     print
     print '[' + artist + '] Ablums:'
     print '------------------------'
     for album in music[artist]:
-        print album
+        print album + ' ' + str(check_album_folder(join(root, artist, album)))
+
+        # if check_album_folder(join(root, artist, album)):
+        #     print album + ' ✓'
+        # else:
+        #     print album + ' ?'
