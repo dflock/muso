@@ -140,7 +140,7 @@ def check_music_file(file):
 def render_artist_output_plain_text(artist):
     tmp = '\n'
     tmp += artist + '\n'
-    tmp += ''.ljust(55, '-') + ' Music '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-')
+    tmp += ''.ljust(55, '-') + ' Cruft '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-')
     tmp += '\n'
 
     return tmp

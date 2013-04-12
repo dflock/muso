@@ -55,3 +55,4 @@ These are more statistical/informational:
 ## TODO:
 
 * Choose a tagging library. Probably either [Mutagen](http://code.google.com/p/mutagen/) or [hsaudiotag](https://pypi.python.org/pypi/hsaudiotag)
+* Should probably be more OO, yo.
