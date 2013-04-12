@@ -59,6 +59,7 @@ def check_album_folder(path):
         only_contains_music = True
         folder_has_date = False
         folder_has_cd = False
+        folder_has_spaces = False
 
         folder_date = re.compile('.*\(\d{2,4}\).*')
         if folder_date.match(path):
@@ -70,6 +71,11 @@ def check_album_folder(path):
             # Folder name contains a CD-a-like: [cd 1]
             folder_has_cd = True
 
+        folder_space = re.compile('^ .*|.*  .*|.* $')
+        if folder_space.match(path):
+            # Folder name starts with a space, has multiple spaces, or ends with a space.
+            folder_has_spaces = True
+
         for item in contents:
             item_path = join(path, item)
             if is_image_file(item_path):
@@ -79,11 +85,12 @@ def check_album_folder(path):
                 only_contains_music = False
 
     return {
-        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd,
+        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces,
         'has_album_art': has_album_art,
         'only_contains_music': only_contains_music,
         'folder_has_date': folder_has_date,
-        'folder_has_cd': folder_has_cd
+        'folder_has_cd': folder_has_cd,
+        'folder_has_spaces': folder_has_spaces
     }
 
 
@@ -133,7 +140,7 @@ def check_music_file(file):
 def render_artist_output_plain_text(artist):
     tmp = '\n'
     tmp += artist + '\n'
-    tmp += ''.ljust(55, '-') + ' Music '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-')
+    tmp += ''.ljust(55, '-') + ' Music '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-')
     tmp += '\n'
 
     return tmp
@@ -146,6 +153,7 @@ def render_album_output_plain_text(album, status):
     str_status += render_value_plain_text(status['has_album_art'])
     str_status += render_value_plain_text(not status['folder_has_date'])
     str_status += render_value_plain_text(not status['folder_has_cd'])
+    str_status += render_value_plain_text(not status['folder_has_spaces'])
 
     album_name = (album[:50] + '..') if len(album) > 50 else album
 

@@ -2,7 +2,7 @@
 
 Muso will audit a large digital music collection and check for consistency and proper structure - in both metadata/tags and file & folder names.
 
-Muso currently defaults to scanning `~/Music` and output something like this to the console:
+Muso currently defaults to scanning `~/Music` and outputs something like this to the console:
 
 ![Currently looks something like this](./docs/images/Screenshot%20-%2013-04-11%20-%2005:57:15%20PM.png)
 
