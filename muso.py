@@ -12,6 +12,8 @@ from os.path import join
 from os.path import isdir
 from os.path import isfile
 
+import re
+
 import mimetypes
 
 
@@ -55,6 +57,18 @@ def check_album_folder(path):
 
         has_album_art = False
         only_contains_music = True
+        folder_has_date = False
+        folder_has_cd = False
+
+        folder_date = re.compile('.*\(\d{2,4}\).*')
+        if folder_date.match(path):
+            # Folder name contains a date-a-like: (1999)
+            folder_has_date = True
+
+        folder_cd = re.compile('.*\[?(cd|disk).*\]?.*', re.IGNORECASE)
+        if folder_cd.match(path):
+            # Folder name contains a CD-a-like: [cd 1]
+            folder_has_cd = True
 
         for item in contents:
             item_path = join(path, item)
@@ -64,8 +78,13 @@ def check_album_folder(path):
             elif not (is_music_file(item_path) or is_ignored_file(item_path)):
                 only_contains_music = False
 
-    # return has_album_art and only_contains_music
-    return {'ok': has_album_art and only_contains_music, 'has_album_art': has_album_art, 'only_contains_music': only_contains_music}
+    return {
+        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd,
+        'has_album_art': has_album_art,
+        'only_contains_music': only_contains_music,
+        'folder_has_date': folder_has_date,
+        'folder_has_cd': folder_has_cd
+    }
 
 
 def is_music_file(file):
@@ -110,6 +129,38 @@ def check_music_file(file):
     """
     pass
 
+
+def render_artist_output_plain_text(artist):
+    tmp = '\n'
+    tmp += artist + '\n'
+    tmp += ''.ljust(55, '-') + ' Music '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-')
+    tmp += '\n'
+
+    return tmp
+
+
+def render_album_output_plain_text(album, status):
+    str_status = ''
+
+    str_status += render_value_plain_text(status['only_contains_music'])
+    str_status += render_value_plain_text(status['has_album_art'])
+    str_status += render_value_plain_text(not status['folder_has_date'])
+    str_status += render_value_plain_text(not status['folder_has_cd'])
+
+    album_name = (album[:50] + '..') if len(album) > 50 else album
+
+    return album_name.ljust(57) + str(str_status) + '\n'
+
+
+def render_value_plain_text(val, width=12):
+    if val:
+        tmp = '✓'.ljust(width)
+    else:
+        tmp = '✗'.ljust(width)
+
+    return tmp
+
+
 mimetypes.init()
 mimetypes.add_type('application/x-cue', '.cue', strict=True)
 mimetypes.add_type('text/x-log', '.log', strict=True)
@@ -117,24 +168,24 @@ mimetypes.add_type('application/x-sfv', '.sfv', strict=True)
 
 root = os.path.expanduser('~') + '/Music'
 music = build_file_tree(root)
+artist_tmp = ''
 tmp = ''
 output = ''
 
+artist_count = 0
+album_count = 0
+
 for artist in music.keys():
-    tmp += "\n"
-    tmp += '[' + artist + '] Ablums:\n'
-    tmp += '------------------------\n'
     for album in music[artist]:
         status = check_album_folder(join(root, artist, album))
         if status['ok'] is False:
-            tmp += album.ljust(80) + ' ' + str(status) + '\n'
-            output += tmp
-        else:
-            tmp = ''
+            tmp += render_album_output_plain_text(album, status)
+            album_count += 1
 
-        # if check_album_folder(join(root, artist, album)):
-        #     tmp += album + ' ✓'
-        # else:
-        #     tmp += album + ' ✗'
+    if tmp:
+        output += render_artist_output_plain_text(artist) + tmp
+        tmp = ''
+        artist_count += 1
 
 print output
+print str(artist_count) + ' Artists, ' + str(album_count) + ' Albums with issues.'
