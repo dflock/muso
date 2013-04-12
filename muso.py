@@ -16,6 +16,8 @@ import re
 
 import mimetypes
 
+from hsaudiotag import auto
+
 
 def build_file_tree(root):
     """
@@ -154,7 +156,9 @@ def check_music_file(file):
         - Regular Albums:     <artist> - <album> - <discnumber>.<tracknumber> - <title>.ext
     - Check tags
     """
-    pass
+    music_file = auto.File(file)
+
+    return music_file.valid
 
 
 def render_artist_output_plain_text(artist, status):
