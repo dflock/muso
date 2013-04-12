@@ -38,9 +38,29 @@ def check_artist_folder(path):
     Check that the given path looks like an Artist folder should:
 
     - has a folder.jpg, possibly more than one image, but no music.
-    - otherwise, only contains folders, which contain music
+    - otherwise, only contains folders
     """
-    pass
+
+    if isdir(path):
+        contents = os.listdir(path)
+        files = filter(lambda x: isfile(join(path, x)) and not x.startswith('.'), contents)
+
+        has_art = False
+        only_contains_folders = True
+
+        for item in files:
+            item_path = join(path, item)
+            if is_image_file(item_path):
+                # This needs to specifically check for folder.jpg too, because it's special.
+                has_art = True
+            elif not (isdir(item_path) or is_ignored_file(item_path)):
+                only_contains_folders = False
+
+    return {
+        'ok': has_art and only_contains_folders,
+        'has_art': has_art,
+        'only_contains_folders': only_contains_folders
+    }
 
 
 def check_album_folder(path):
@@ -137,9 +157,14 @@ def check_music_file(file):
     pass
 
 
-def render_artist_output_plain_text(artist):
+def render_artist_output_plain_text(artist, status):
+
+    str_status = ''
+    str_status += render_value_plain_text(status['only_contains_folders'])
+    str_status += render_value_plain_text(status['has_art'])
+
     tmp = '\n'
-    tmp += artist + '\n'
+    tmp += artist.ljust(57, ' ') + str_status + '\n'
     tmp += ''.ljust(55, '-') + ' Cruft '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-')
     tmp += '\n'
 
@@ -147,8 +172,8 @@ def render_artist_output_plain_text(artist):
 
 
 def render_album_output_plain_text(album, status):
-    str_status = ''
 
+    str_status = ''
     str_status += render_value_plain_text(status['only_contains_music'])
     str_status += render_value_plain_text(status['has_album_art'])
     str_status += render_value_plain_text(not status['folder_has_date'])
@@ -185,13 +210,16 @@ album_count = 0
 
 for artist in music.keys():
     for album in music[artist]:
-        status = check_album_folder(join(root, artist, album))
-        if status['ok'] is False:
-            tmp += render_album_output_plain_text(album, status)
+        artist_status = check_artist_folder(join(root, artist))
+        album_status = check_album_folder(join(root, artist, album))
+        if album_status['ok'] is False:
+            tmp += render_album_output_plain_text(album, album_status)
             album_count += 1
 
+    # this makes is complain about artist folders with no art in, which I'd like to see, but not now, there are too many of them.
+    # if tmp or artist_status['ok'] is False:
     if tmp:
-        output += render_artist_output_plain_text(artist) + tmp
+        output += render_artist_output_plain_text(artist, artist_status) + tmp
         tmp = ''
         artist_count += 1
 
