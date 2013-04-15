@@ -16,7 +16,7 @@ import re
 
 import mimetypes
 
-from hsaudiotag import auto
+# from hsaudiotag import auto
 
 
 def build_file_tree(root):
@@ -82,6 +82,7 @@ def check_album_folder(path):
         folder_has_date = False
         folder_has_cd = False
         folder_has_spaces = False
+        music_consistent = True
 
         folder_date = re.compile('.*\(\d{2,4}\).*')
         if folder_date.match(path):
@@ -103,13 +104,18 @@ def check_album_folder(path):
             if is_image_file(item_path):
                 # This needs to specifically check for folder.jpg too, because it's special.
                 has_album_art = True
+            elif is_music_file(item_path):
+                # Further check music file for consistency
+                if not check_music_file(item_path):
+                    music_consistent = False
             elif not (is_music_file(item_path) or is_ignored_file(item_path)):
                 only_contains_music = False
 
     return {
-        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces,
+        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces and music_consistent,
         'has_album_art': has_album_art,
         'only_contains_music': only_contains_music,
+        'music_consistent': music_consistent,
         'folder_has_date': folder_has_date,
         'folder_has_cd': folder_has_cd,
         'folder_has_spaces': folder_has_spaces
@@ -122,7 +128,6 @@ def is_music_file(file):
     """
     try:
         return mimetypes.guess_type(file)[0].startswith('audio')
-        # return mimetypes.guess_type(file)[0].startswith('audio') and check_music_file(file)
     except AttributeError:
         return False
 
@@ -157,9 +162,35 @@ def check_music_file(file):
         - Regular Albums:     <artist> - <album> - <discnumber>.<tracknumber> - <title>.ext
     - Check tags
     """
-    music_file = auto.File(file)
+    album, filename = os.path.split(file)
+    artist, album = os.path.split(album)
+    artist = os.path.split(artist)[1]
 
-    return music_file.valid
+    # print 'path: ' + file
+    # print 'artist: ' + artist
+    # print 'album: ' + album
+    # print 'filename: ' + filename
+    # print '----------------------'
+
+    # Don't expect any of the following reserved characters to be in the filename, even if they're in the metadata:
+    #     < (less than)
+    #     > (greater than)
+    #     : (colon)
+    #     " (double quote)
+    #     / (forward slash)
+    #     \ (backslash)
+    #     | (vertical bar or pipe)
+    #     ? (question mark)
+    #     * (asterisk)
+
+    illegal_chars = re.compile(r'\<|\>|\:|\"|\/|\||\?|\*|\\')
+    artist = illegal_chars.sub('.', artist)
+    album = illegal_chars.sub('.', album)
+
+    general_album = re.compile(artist + ' - ' + album + ' - \d+\.\d+ - .*', re.IGNORECASE)
+    compilation_album = re.compile(album + ' - \d+\.\d+ - ' + artist + ' - .*', re.IGNORECASE)
+
+    return general_album.match(filename) or compilation_album.match(filename)
 
 
 def render_artist_output_plain_text(artist, status):
@@ -170,7 +201,7 @@ def render_artist_output_plain_text(artist, status):
 
     tmp = '\n'
     tmp += artist.ljust(57, ' ') + str_status + '\n'
-    tmp += ''.ljust(55, '-') + ' Cruft '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-')
+    tmp += ''.ljust(55, '-') + ' Cruft '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-') + ' M.Cons '.ljust(10, '-')
     tmp += '\n'
 
     return tmp
@@ -184,6 +215,7 @@ def render_album_output_plain_text(album, status):
     str_status += render_value_plain_text(not status['folder_has_date'])
     str_status += render_value_plain_text(not status['folder_has_cd'])
     str_status += render_value_plain_text(not status['folder_has_spaces'])
+    str_status += render_value_plain_text(status['music_consistent'])
 
     album_name = (album[:50] + '..') if len(album) > 50 else album
 
