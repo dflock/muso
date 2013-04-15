@@ -121,7 +121,8 @@ def is_music_file(file):
     Is file a music file?
     """
     try:
-        return mimetypes.guess_type(file)[0].startswith('audio') and check_music_file(file)
+        return mimetypes.guess_type(file)[0].startswith('audio')
+        # return mimetypes.guess_type(file)[0].startswith('audio') and check_music_file(file)
     except AttributeError:
         return False
 
@@ -203,8 +204,8 @@ mimetypes.add_type('application/x-cue', '.cue', strict=True)
 mimetypes.add_type('text/x-log', '.log', strict=True)
 mimetypes.add_type('application/x-sfv', '.sfv', strict=True)
 
-# root = os.path.expanduser('~') + '/Music'
-root = '/home/duncan/tmp/muso'
+root = os.path.expanduser('~') + '/Music'
+# root = '/home/duncan/tmp/muso'
 music = build_file_tree(root)
 artist_tmp = ''
 tmp = ''
