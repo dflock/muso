@@ -27,6 +27,7 @@ These are things that you might want to fix:
 * Albums with '(YYYY)' in the folder name
 * Albums with '[cd|disk ??]' in the folder name
 * Albums with extraneous spaces in the folder name
+* Albums with folder names that Aren't Title Case
 * Extraneous .m3u, .info, .sfv, etc... files.
 * The following filename structures:
 	* Compilation Albums: `<album> - <discnumber>.<tracknumber> - <artist> - <title>.ext`
@@ -38,7 +39,6 @@ These are things that you might want to fix:
 	* album, albumartist, discnumber, genre, date
 	* replaygain_album_gain, replaygain_album_peak
 	* musicbrainz_albumid, musicbrainz_albumartistid
-* Albums with folder names that Aren't Title Case
 * Compilation albums that don't have albumartists set to 'Various Artists'
 * Tracks missing any of the following tags:
 	* album, artist, albumartist, tracknumber, discnumber, title, genre, date

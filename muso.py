@@ -16,6 +16,8 @@ import re
 
 import mimetypes
 
+from titlecase import titlecase
+
 # from hsaudiotag import auto
 
 
@@ -82,6 +84,7 @@ def check_album_folder(path):
         folder_has_date = False
         folder_has_cd = False
         folder_has_spaces = False
+        folder_titlecase = True
         music_consistent = True
 
         folder_date = re.compile('.*\(\d{2,4}\).*')
@@ -111,14 +114,19 @@ def check_album_folder(path):
             elif not (is_music_file(item_path) or is_ignored_file(item_path)):
                 only_contains_music = False
 
+        album_folder = os.path.split(path)[1]
+        if album_folder != titlecase(album_folder):
+            folder_titlecase = False
+
     return {
-        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces and music_consistent,
+        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces and music_consistent and folder_titlecase,
         'has_album_art': has_album_art,
         'only_contains_music': only_contains_music,
         'music_consistent': music_consistent,
         'folder_has_date': folder_has_date,
         'folder_has_cd': folder_has_cd,
-        'folder_has_spaces': folder_has_spaces
+        'folder_has_spaces': folder_has_spaces,
+        'folder_titlecase': folder_titlecase
     }
 
 
@@ -172,7 +180,7 @@ def check_music_file(file):
     # print 'filename: ' + filename
     # print '----------------------'
 
-    # Don't expect any of the following reserved characters to be in the filename, even if they're in the metadata:
+    # Don't require any of the following reserved characters to be in the filename, even if they're in the metadata:
     #     < (less than)
     #     > (greater than)
     #     : (colon)
@@ -201,7 +209,7 @@ def render_artist_output_plain_text(artist, status):
 
     tmp = '\n'
     tmp += artist.ljust(57, ' ') + str_status + '\n'
-    tmp += ''.ljust(55, '-') + ' Cruft '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-') + ' M.Cons '.ljust(10, '-')
+    tmp += ''.ljust(55, '-') + ' Cruft '.ljust(10, '-') + ' Art '.ljust(10, '-') + ' F.Date '.ljust(10, '-') + ' F.CD '.ljust(10, '-') + ' F.Space '.ljust(10, '-') + ' F.Title '.ljust(10, '-') + ' M.Cons '.ljust(10, '-')
     tmp += '\n'
 
     return tmp
@@ -215,6 +223,7 @@ def render_album_output_plain_text(album, status):
     str_status += render_value_plain_text(not status['folder_has_date'])
     str_status += render_value_plain_text(not status['folder_has_cd'])
     str_status += render_value_plain_text(not status['folder_has_spaces'])
+    str_status += render_value_plain_text(status['folder_titlecase'])
     str_status += render_value_plain_text(status['music_consistent'])
 
     album_name = (album[:50] + '..') if len(album) > 50 else album
