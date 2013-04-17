@@ -36,14 +36,14 @@ These are things that you might want to fix:
 ### Not implemented yet:
 
 * Albums with any of the following tags not the same for each track:
-	* album, albumartist, discnumber, genre, date
-	* replaygain_album_gain, replaygain_album_peak
-	* musicbrainz_albumid, musicbrainz_albumartistid
+	* `album`, `albumartist`, `discnumber`, `genre`, `date`
+	* `replaygain_album_gain`, `replaygain_album_peak`
+	* `musicbrainz_albumid`, `musicbrainz_albumartistid`
 * Compilation albums that don't have albumartists set to 'Various Artists'
 * Tracks missing any of the following tags:
-	* album, artist, albumartist, tracknumber, discnumber, title, genre, date
-	* replaygain_album_gain, replaygain_album_peak, replaygain_track_gain, replaygain_track_peak
-	* musicbrainz_albumid, musicbrainz_albumartistid, musicbrainz_trackid
+	* `album`, `artist`, `albumartist`, `tracknumber`, `discnumber`, `title`, `genre`, `date`
+	* `replaygain_album_gain`, `replaygain_album_peak`, `replaygain_track_gain`, `replaygain_track_peak`
+	* `musicbrainz_albumid`, `musicbrainz_albumartistid`, `musicbrainz_trackid`
 * A folder.jpg in each album & artist folder, of at least 500x500px
 * Genre issues:
 	* Genre's with small number of tracks/ one track/ablum in
@@ -66,3 +66,4 @@ These are more statistical/informational:
 ## TODO:
 
 * Should probably be more OO, yo.
+* Maybe need to think about multi-thread/process, to deal with slowness when reading tags?
