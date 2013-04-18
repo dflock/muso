@@ -50,19 +50,21 @@ def check_artist_folder(path):
         files = filter(lambda x: isfile(join(path, x)) and not x.startswith('.'), contents)
 
         has_art = False
+        has_folder_jpg = False
         only_contains_folders = True
 
         for item in files:
             item_path = join(path, item)
             if is_image_file(item_path):
-                # This needs to specifically check for folder.jpg too, because it's special.
                 has_art = True
+                if is_folder_art(item):
+                    has_folder_jpg = True
             elif not (isdir(item_path) or is_ignored_file(item_path)):
                 only_contains_folders = False
 
     return {
-        'ok': has_art and only_contains_folders,
-        'has_art': has_art,
+        'ok': has_art and only_contains_folders and has_folder_jpg,
+        'has_art': has_art and has_folder_jpg,
         'only_contains_folders': only_contains_folders
     }
 
@@ -71,8 +73,8 @@ def check_album_folder(path):
     """
     Check that the given path looks like an Album folder should:
 
-    - has a folder.jpg
-    - otherwise, only contains music
+    - has a folder.jpg, possibly more than one image, but no music.
+    - otherwise, only contains music, or certain .log/.cue type files that are ignored.
     """
 
     if isdir(path):
@@ -80,6 +82,7 @@ def check_album_folder(path):
         contents = filter(lambda x: isfile(join(path, x)) and not x.startswith('.'), contents)
 
         has_album_art = False
+        has_folder_jpg = False
         only_contains_music = True
         folder_has_date = False
         folder_has_cd = False
@@ -87,26 +90,24 @@ def check_album_folder(path):
         folder_titlecase = True
         music_consistent = True
 
-        folder_date = re.compile('.*\(\d{2,4}\).*')
-        if folder_date.match(path):
+        if re_folder_date.match(path):
             # Folder name contains a date-a-like: (1999)
             folder_has_date = True
 
-        folder_cd = re.compile('.*\[?(cd|disk).*\]?.*', re.IGNORECASE)
-        if folder_cd.match(path):
+        if re_folder_cd.match(path):
             # Folder name contains a CD-a-like: [cd 1]
             folder_has_cd = True
 
-        folder_space = re.compile('^ .*|.*  .*|.* $')
-        if folder_space.match(path):
+        if re_folder_space.match(path):
             # Folder name starts with a space, has multiple spaces, or ends with a space.
             folder_has_spaces = True
 
         for item in contents:
             item_path = join(path, item)
             if is_image_file(item_path):
-                # This needs to specifically check for folder.jpg too, because it's special.
                 has_album_art = True
+                if is_folder_art(item):
+                    has_folder_jpg = True
             elif is_music_file(item_path):
                 # Further check music file for consistency
                 if not check_music_file(item_path):
@@ -119,8 +120,8 @@ def check_album_folder(path):
             folder_titlecase = False
 
     return {
-        'ok': has_album_art and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces and music_consistent and folder_titlecase,
-        'has_album_art': has_album_art,
+        'ok': has_album_art and has_folder_jpg and only_contains_music and not folder_has_date and not folder_has_cd and not folder_has_spaces and music_consistent and folder_titlecase,
+        'has_album_art': has_album_art and has_folder_jpg,
         'only_contains_music': only_contains_music,
         'music_consistent': music_consistent,
         'folder_has_date': folder_has_date,
@@ -150,9 +151,18 @@ def is_image_file(file):
         return False
 
 
+def is_folder_art(file):
+    """
+    Is file called folder.jpg
+    TODO: Is it at least 500px square?
+    """
+    if re_folder_jpeg.match(os.path.basename(file)):
+        return True
+
+
 def is_ignored_file(file):
     """
-    Can we ignore this file and pretend that it wasn't there?
+    Can we ignore this file and pretend it isn't there?
     """
     try:
         return mimetypes.guess_type(file)[0] in ('application/x-cue', 'text/x-log', 'application/x-sfv')
@@ -240,20 +250,28 @@ def render_value_plain_text(val, width=12):
     return tmp
 
 
+# Initialization stuff
+
 mimetypes.init()
 mimetypes.add_type('application/x-cue', '.cue', strict=True)
 mimetypes.add_type('text/x-log', '.log', strict=True)
 mimetypes.add_type('application/x-sfv', '.sfv', strict=True)
 
+re_folder_date = re.compile('.*\(\d{2,4}\).*')
+re_folder_cd = re.compile('.*\[?(cd|disk).*\]?.*', re.IGNORECASE)
+re_folder_space = re.compile('^ .*|.*  .*|.* $')
+re_folder_jpeg = re.compile('folder.jpe?g', re.IGNORECASE)
+
 root = os.path.expanduser('~') + '/Music'
 # root = '/home/duncan/tmp/muso'
-music = build_file_tree(root)
 artist_tmp = ''
 tmp = ''
 output = ''
 
 artist_count = 0
 album_count = 0
+
+music = build_file_tree(root)
 
 for artist in music.keys():
     for album in music[artist]:

@@ -66,4 +66,5 @@ These are more statistical/informational:
 ## TODO:
 
 * Should probably be more OO, yo.
+* Needs more renderers for output - maybe HTML, CSV. Should probably use Jinja or something for this?
 * Maybe need to think about multi-thread/process, to deal with slowness when reading tags?
