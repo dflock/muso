@@ -18,6 +18,8 @@ import mimetypes
 
 from titlecase import titlecase
 
+from PIL import Image
+
 # from hsaudiotag import auto
 
 
@@ -57,7 +59,7 @@ def check_artist_folder(path):
             item_path = join(path, item)
             if is_image_file(item_path):
                 has_art = True
-                if is_folder_art(item):
+                if is_folder_art(item_path):
                     has_folder_jpg = True
             elif not (isdir(item_path) or is_ignored_file(item_path)):
                 only_contains_folders = False
@@ -106,7 +108,7 @@ def check_album_folder(path):
             item_path = join(path, item)
             if is_image_file(item_path):
                 has_album_art = True
-                if is_folder_art(item):
+                if is_folder_art(item_path):
                     has_folder_jpg = True
             elif is_music_file(item_path):
                 # Further check music file for consistency
@@ -157,7 +159,9 @@ def is_folder_art(file):
     TODO: Is it at least 500px square?
     """
     if re_folder_jpeg.match(os.path.basename(file)):
-        return True
+        im = Image.open(file)
+        if im.size[0] >= 500 and im.size[1] >= 500:
+            return True
 
 
 def is_ignored_file(file):
