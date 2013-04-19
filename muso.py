@@ -79,6 +79,8 @@ def check_album_folder(path):
     - otherwise, only contains music, or certain .log/.cue type files that are ignored.
     """
 
+    track_count = 0
+
     if isdir(path):
         contents = os.listdir(path)
         contents = filter(lambda x: isfile(join(path, x)) and not x.startswith('.'), contents)
@@ -112,6 +114,7 @@ def check_album_folder(path):
                     has_folder_jpg = True
             elif is_music_file(item_path):
                 # Further check music file for consistency
+                track_count += 1
                 if not check_music_file(item_path):
                     music_consistent = False
             elif not (is_music_file(item_path) or is_ignored_file(item_path)):
@@ -129,7 +132,8 @@ def check_album_folder(path):
         'folder_has_date': folder_has_date,
         'folder_has_cd': folder_has_cd,
         'folder_has_spaces': folder_has_spaces,
-        'folder_titlecase': folder_titlecase
+        'folder_titlecase': folder_titlecase,
+        'track_count': track_count
     }
 
 
@@ -254,6 +258,15 @@ def render_value_plain_text(val, width=12):
     return tmp
 
 
+def render_totals_plain_text():
+    tmp  = '\n\n' + ''.ljust(50, '=') + '\n'
+    tmp += 'Total:    {0:>4,} Artists, '.format(artist_count) + '{0:>4,} Albums, '.format(album_count) + '{0:>6,} Tracks.'.format(track_count) + '\n'
+    tmp += 'Issues:   {0:>4,} Artists, '.format(artist_issues_count) + '{0:>4,} Albums, '.format(album_issues_count) + '{0:>6} Tracks.'.format(track_issues_count) + '\n' + '\n'
+
+    tmp += '%age with Issues: {:.2%} Artists, '.format(float(artist_issues_count) / float(artist_count)) + '{:.2%} Albums, '.format(float(album_issues_count) / float(album_count)) + '{0:>6} Tracks.'.format(track_issues_count) + '\n'
+    return tmp
+
+
 # Initialization stuff
 
 mimetypes.init()
@@ -274,23 +287,31 @@ output = ''
 
 artist_count = 0
 album_count = 0
+track_count = 0
+artist_issues_count = 0
+album_issues_count = 0
+track_issues_count = '?'
 
 music = build_file_tree(root)
 
 for artist in music.keys():
+    artist_count += 1
     for album in music[artist]:
+        album_count += 1
         artist_status = check_artist_folder(join(root, artist))
         album_status = check_album_folder(join(root, artist, album))
+        track_count += album_status['track_count']
         if album_status['ok'] is False:
             tmp += render_album_output_plain_text(album, album_status)
-            album_count += 1
+            album_issues_count += 1
 
     # this makes is complain about artist folders with no art in, which I'd like to see, but not now, there are too many of them.
     # if tmp or artist_status['ok'] is False:
     if tmp:
         output += render_artist_output_plain_text(artist, artist_status) + tmp
         tmp = ''
-        artist_count += 1
+        artist_issues_count += 1
+
+output += render_totals_plain_text()
 
 print output
-print str(artist_count) + ' Artists, ' + str(album_count) + ' Albums with issues.'
